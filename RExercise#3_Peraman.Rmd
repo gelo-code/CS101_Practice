@@ -1,5 +1,0 @@
----
-title: "RExercise#3_Peraman"
-output: html_document
----
-
