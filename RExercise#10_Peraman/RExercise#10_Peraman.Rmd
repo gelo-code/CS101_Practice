@@ -1,0 +1,182 @@
+---
+title: "RExercise#10_Peraman"
+author: "Peraman"
+date: "2026-11-27"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+Question #1
+
+what is the output of each line? Explain briefly with your own words.
+
+```{r}
+m <- matrix(1:6, nrow = 2)
+m
+apply(m, 1, sum)
+apply(m, 2, sum)
+class(lapply(1:3, function(i) i^2))
+sapply(1:3, function(i) i^2)
+sapply(c('a', 'bb', 'ccc'), nchar)
+mapply(function(x, y) x * y, 1:3, 4:6)
+tapply(c(10, 20, 30, 40), c('u', 'v', 'u', 'v'), sum)
+
+```
+Answers:
+a. shows 9 12 because setting margin to 1 sums across each of the two rows
+
+b.  setting margin to 2 sums each three columns which are 3 7 and 11 
+
+c. displays "lists" because apply() always return a list, regardless if the elements can be simplified
+
+d. sapply() simplifies squared value from list returning the vector 1 4 9
+
+e. a bb ccc are names if integer vectors, this shows the character count of each string
+
+f. mapply() multiplies elements pair by pair returning 4 10 18
+
+g. tapply() returns a 1D array of named values and it groups elements before summing
+
+
+
+Question #2:
+
+Use this data for b.1 and b.2
+
+```{r}
+scores <- matrix(c(70, 85, 90,
+                   60, 75, 80,
+                   88, 92, 79),
+                 nrow = 3, byrow = TRUE,
+                 dimnames = list(c('Ana', 'Ben', 'Cara'), c('Math', 'Sci', 'Eng')))
+ 
+temps <- list(Mon = c(30, 32, 31), Tue = c(29, 33), Wed = c(31, 34, 35, 30))
+```
+
+b.1 Find (a) each student’s average, 
+
+```{r}
+student_avg <- apply(scores, 1, mean)
+```
+
+(b) each subject’s highest score, 
+
+```{r}
+subject_max <- apply(scores, 2, max)
+```
+
+
+and (c) the name of the best subject for each student. Use apply function.
+
+```{r}
+best_subject <- apply(scores, 1, function(row) colnames(scores)[which.max(row)])
+```
+
+b.2 For temps, compute the mean, the number of readings, and the range for each day. Use lapply() for one, sapply() for another, and vapply() for a third, and explain why the range result is a matrix.
+
+```{r}
+temps <- list(Mon = c(30, 32, 31), Tue = c(29, 33), Wed = c(31, 34, 35, 30))
+
+lapply(temps, mean)
+
+sapply(temps, length)
+
+vapply(temps, range, numeric(2))
+```
+
+
+Question #3:
+
+Two loans have principals 1000 and 2000, rates 5% and 4%, and terms 2 and 3 years. Compute the final amount p * (1 + r)^n for each with mapply(). Then rewrite it so that the rate is a fixed 4.5% using MoreArgs. 
+
+Answer:
+```{r}
+p <- c(1000, 2000)
+r <- c(0.05, 0.04)
+n <- c(2, 3)
+
+mapply(function(p, r, n) p * (1 + r)^n, p, r, n)
+
+mapply(function(p, r, n) p * (1 + r)^n, p = p, n = n, MoreArgs = list(r = 0.045))
+```
+
+Question #4:
+
+Use iris dataset. (a) Mean Sepal.Length of iris for each species. (b) The number of cars in mtcars for every combination of cyl and am. (c) Mean mpg per cyl, ignoring missing values (add na.rm = TRUE)
+
+Answer:
+```{r}
+tapply(iris$Sepal.Length, iris$Species, mean)
+
+table(mtcars$cyl, mtcars$am)
+
+tapply(mtcars$mpg, mtcars$cyl, mean, na.rm = TRUE)
+```
+
+Part A — Debugging
+Question #5:
+
+Each snippet has a mistake. Find it, explain it in one sentence and fix it.
+
+a.)
+
+```{r}
+##sapply(list(a = 1:3, b = 4:6), mean())
+```
+Mistake: mean() includes parentheses, which immediately calls the function with no arguments
+
+Fix: 
+```{r}
+sapply(list(a = 1:3, b = 4:6), mean)
+```
+
+
+b.) expected one mean per column of a 3 x 2 matrix, got three numbers apply(matrix(1:6, nrow = 3), 1, mean)
+
+```{r}
+##apply(matrix(1:6, nrow = 3), 1, mean)
+```
+
+Mistake: The MARGIN argument is set to 1 instead of 2
+
+fix:
+
+```{r}
+apply(matrix(1:6, nrow = 3), 2, mean)
+
+```
+
+
+c. ) wanted the class of each column
+
+```{r}
+##df <- data.frame(n = c(1, 2), s = c('a', 'b'))
+##apply(df, 2, class)
+```
+
+Mistake: apply() converts the data frame into a matrix first, whereas sapply() iterates over each column individually to preserve its true data type.
+
+Fix:
+```{r}
+df <- data.frame(n = c(1, 2), s = c('a', 'b'))
+sapply(df, class)
+```
+
+Question #6:
+
+a. ) Explain in your own words the difference between lapply() and sapply(). When would you choose vapply() instead?
+
+Answer:
+According to my understanding, both lapply() and sapply() are used for applying a certain function on all elements of either a list or a vector object. The only difference between lapply() and sapply() is that lapply() always returns the results in a list format whereas sapply() attempts to simplify the output as much as possible, for example, in a vector or a matrix form.
+
+When I have some requirements regarding the expected output type and length, vapply() would be better to use as it allows for specifying these parameters in order to avoid any undesired outcomes.
+
+In conclusion, when I need the output in a list form, lapply() will be the best choice, when I want a simplified form of the output, sapply() will suit, and when I need a simplified output form with more safety conditions, vapply() will be the better choice.
+
+
+b. ) A colleague computes group means with lapply(split(x, g), mean). Which function gives the same result in one call, and what does it return?
+
+Answer:
+tapply(x, g, mean). It calculates the mean of x for each group in g and returns the results in an array, usually a named vector when there is only one grouping variable.
+
