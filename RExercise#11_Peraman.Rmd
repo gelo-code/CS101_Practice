@@ -1,0 +1,340 @@
+---
+title: 'R Lab: Conditional Statements in R'
+author: 'Peraman'
+date: '2026-11-27'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part A - Examples of Conditional Statements
+
+**Example A: if ... else**
+
+```{r exA}
+score <- 78
+
+if (score >= 75) {
+  print('Passed')
+} else {
+  print('Failed')
+}
+```
+
+**Example B: if ... else if ... else**
+
+```{r exB}
+score <- 86
+
+if (score >= 90) {
+  print('Excellent')
+} else if (score >= 80) {
+  print('Good')
+} else if (score >= 75) {
+  print('Fair')
+} else {
+  print('Needs Improvement')
+}
+```
+
+**Example C: ifelse() for a whole vector**
+
+```{r exC}
+scores <- c(92, 68, 75, 81, 59)
+ifelse(scores >= 75, 'Passed', 'Failed')
+```
+
+**Example D: combining conditions**
+
+```{r exD}
+grade <- 91
+attendance <- 95
+
+if (grade >= 90 & attendance >= 90) {
+  print('Honors candidate')
+}
+```
+
+# Part B - Conditional Statements
+
+## Question #1
+
+Set temp <- 33. Print 'Hot' if temp is 32 or higher, otherwise print 'Not hot'.
+
+```{r q1}
+temp <- 33
+if (temp >= 32) {
+print("Hot")
+} else {
+print("Not hot")
+}
+```
+
+## Question #2
+
+Set age <- 17. Use if ... else if ... else to print 'Child' for ages below 13, 'Teenager' for 13 to 19, and 'Adult' for 20 and above.
+
+```{r q2}
+age <- 17
+if (age < 13) {
+print("Child")
+} else if (age <= 19) {
+print("Teenager")
+} else {
+print("Adult")
+}
+```
+
+## Question #3
+
+Create marks <- c(45, 88, 73, 100, 62). Use ifelse() to create a vector result that says 'Pass' for marks of 60 or higher and 'Fail' otherwise. Print result.
+
+```{r q3}
+marks <- c(45, 88, 73, 100, 62)
+result <- ifelse(marks >= 60, "Pass", "Fail")
+print(result)
+```
+
+## Question #4
+
+Predict the output of the code below before you run it. Then run it and explain, in a comment, why you got that result.
+
+```{r q4}
+x <- 10
+if (x > 5) {
+  print('A')
+} else if (x > 8) {
+  print('B')
+} else {
+  print('C')
+}
+# The output is "A" because x is 10, which is greater than 5. The first condition is TRUE, so R executes print("A"). Since the first condition is already TRUE, the else if condition (x > 8) is not checked, even though it is also TRUE.
+```
+
+## Question #5
+
+What is the difference between if and ifelse()? When would you choose each one?
+
+#if is used to make a decision based on one condition, while ifelse() checks conditions for multiple values at once. I would use if for simple decisions and ifelse() when working with vectors or multiple data values.
+
+
+# Part C - Importing the CSV File
+
+## Question #6
+
+**Import the file safely** (use if ... else to check that the file exists before importing it)
+
+```{r q6-import}
+file_name <- "students_grades.csv"
+if (file.exists(file_name)) {
+grades <- read.csv(file_name, stringsAsFactors = FALSE)
+print("File imported.")
+} else {
+stop("File not found. Save students_grades.csv in the same folder as this .Rmd file.")
+}
+```
+
+**Inspect the data** (first 6 rows; number of rows and columns; column names and data types; basic statistics per column; missing values per column)
+
+```{r q6-inspect}
+head(grades)
+
+summary(grades)
+
+colSums(is.na(grades))
+```
+
+**Answer the following:** How many rows and columns does grades have? Which column contains missing values (NA), and how many? What is the data type of the Section column? What are the lowest and highest Attendance values?
+
+#1. How many rows and columns does grades have? 15 rows and 7 columns.
+
+#2. Which column contains missing values (NA), and how many? The Midterm column contains 1 missing value (NA).
+
+#3. What is the data type of the Section column? Character (chr).
+
+#4. What are the lowest and highest Attendance values? Lowest: 70 Highest: 100
+
+**Check** that grades has 15 rows, 7 columns, and exactly one NA.
+
+```{r q6-check}
+stopifnot(nrow(grades)== 15, ncol(grades)== 7, sum(is.na(grades))== 1)
+print("Check passed: 15 rows, 7 columns, 1 NA.")
+```
+
+## Applying Conditional Statements
+
+**f.1 Compute the final grade** (30% Quiz + 30% Midterm + 40% Final)
+
+```{r f1}
+grades$FinalGrade <- 0.30 * grades$Quiz + 0.30 * grades$Midterm + 0.40 * grades$Final
+grades[, c("Name", "FinalGrade")]
+```
+
+**f.2 Pass or fail** (check for NA first)
+
+```{r f2}
+grades$Result <- ifelse(is.na(grades$FinalGrade), "Incomplete",
+ifelse(grades$FinalGrade >= 75, "Passed", "Failed"))
+table(grades$Result)
+```
+
+**f.3 Grade remarks** (paste the f.3 chunk from the starter file, fill in the blanks, then set eval=TRUE)
+
+```{r f3, eval=TRUE}
+grades$Remarks <- ifelse(is.na(grades$FinalGrade), "Incomplete",
+ifelse(grades$FinalGrade >= 90, "Excellent",
+ifelse(grades$FinalGrade >= 85, "Very Good",
+ifelse(grades$FinalGrade >= 80, "Good",
+ifelse(grades$FinalGrade >= 75, "Fair", "Needs Improvement")))))
+table(grades$Remarks)
+```
+
+**f.4 Attendance flag**
+
+```{r f4}
+grades$AttendanceFlag <- ifelse(grades$Attendance < 80, "At Risk", "OK")
+table(grades$AttendanceFlag)
+```
+
+**f.5 Honors candidates**
+
+```{r f5}
+grades$Honors <- ifelse(!is.na(grades$FinalGrade) &
+grades$FinalGrade >= 90 &
+grades$Attendance >= 90, "Yes", "No")
+table(grades$Honors)
+```
+
+**f.6 if ... else if inside a loop**
+
+```{r f6}
+loop_remarks <- character(nrow(grades))
+for (i in seq_len(nrow(grades))) {
+g <- grades$FinalGrade[i]
+if (is.na(g)) {
+loop_remarks[i] <- "Incomplete"
+} else if (g >= 90) {
+loop_remarks[i] <- "Excellent"
+} else if (g >= 85) {
+loop_remarks[i] <- "Very Good"
+} else if (g >= 80) {
+loop_remarks[i] <- "Good"
+} else if (g >= 75) {
+loop_remarks[i] <- "Fair"
+} else {
+loop_remarks[i] <- "Needs Improvement"
+}
+}
+identical(loop_remarks, grades$Remarks)
+```
+
+**f.7** Try if (grades$FinalGrade >= 75) print('Passed') on its own in the Console. Explain the error or warning R gives and why the loop version avoids it.
+
+#The column holds 15 values, so the condition returns 15 results, and one of them is NA. In R 4.2 and newer, if stops with the error “the condition has length > 1”. Older versions print a warning and use only the first value. The loop avoids the problem. It passes one value at a time to if, and the is.na() test removes the NA case first.
+
+**f.8 Summarize your results** (how many passed, how many are At Risk, how many are honors candidates - as comments)
+
+```{r f8}
+table(grades$Result)
+```
+
+**f.9 Check** that grades now has 12 columns.
+
+```{r f9}
+stopifnot(ncol(grades)== 12)
+names(grades)
+```
+
+# Part D - Exporting Results to .csv
+
+## Question #7
+
+**Export the full processed table**
+
+```{r q7-full}
+write.csv(grades, "students_grades_processed.csv", row.names = FALSE)
+```
+
+**Export the at-risk students**
+
+```{r q7-atrisk}
+at_risk <- grades[grades$AttendanceFlag== "At Risk", ]
+if (nrow(at_risk) > 0) {
+write.csv(at_risk, "at_risk_students.csv", row.names = FALSE)
+print(paste(nrow(at_risk), "at-risk students exported."))
+} else {
+print("No at-risk students. No file written.")
+}
+```
+
+**Export the honors list**
+
+```{r q7-honors}
+honors <- grades[grades$Honors== "Yes",
+c("StudentID", "Name", "Section", "FinalGrade", "Attendance")]
+if (nrow(honors) > 0) {
+write.csv(honors, "honors_list.csv", row.names = FALSE)
+print(paste(nrow(honors), "honors candidates exported."))
+} else {
+print("No honors candidates this term.")
+}
+```
+
+**Verify your exports**
+
+```{r q7-verify}
+check_all <- read.csv("students_grades_processed.csv", stringsAsFactors = FALSE)
+dim(check_all)
+
+dim(grades)
+
+colSums(is.na(check_all))
+
+head(check_all)
+```
+
+## Question #8
+
+How does the missing midterm appear in the exported file? What would the file look like without row.names = FALSE? Try it with a temporary file name and compare.
+
+```{r q8}
+write.csv(grades, "temp_with_rownames.csv")
+temp_check <- read.csv("temp_with_rownames.csv")
+names(temp_check)
+```
+
+
+## Question #9
+
+Add a column Scholarship (Pending / Full / Partial / None) using nested ifelse(), select the Full and Partial students, export them to scholarship_candidates.csv with an if ... else guard, and print a count of each category with table().
+
+```{r q9}
+grades$Scholarship <- ifelse(is.na(grades$FinalGrade), "Pending",
+ifelse(grades$FinalGrade >= 95 & grades$Attendance >= 90, "Full",
+ifelse(grades$FinalGrade >= 85 & grades$Attendance >= 90, "Partial",
+"None")))
+```
+
+## Question #10
+
+Answer in one or two sentences each, as comments.
+
+```{r q10}
+# 1. Why did you check is.na() before comparing the final grade to a number?
+# To check if the grade is missing before comparing it. This prevents errors or incorrect results.
+
+# 2. What would happen if the Failed condition were placed before the Incomplete condition?
+# Students with missing grades might be incorrectly marked as Failed instead of Incomplete.
+
+# 3. When is ifelse() the better choice than if ... else, and when is if ... else better?
+# ifelse() is better when applying conditions to multiple values or vectors. if ... else is better for making decisions based on a single condition.
+
+# 4. Why is it useful to read an exported CSV back into R?
+# It helps verify that the data was exported correctly and that no important information was lost or changed.
+
+```
+
